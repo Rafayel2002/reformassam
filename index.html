@@ -1,1 +1,1484 @@
-# reformassam
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAM Reformas – Renovaciones del Hogar</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --yellow: #F5A800;
+    --yellow-light: #FFD166;
+    --yellow-dark: #C88400;
+    --white: #FFFFFF;
+    --gray: #1a1a1a;
+    --gray2: #2a2a2a;
+    --text-muted: #888;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--black);
+    color: var(--white);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--yellow);
+    border-radius: 50%;
+    position: fixed; z-index: 99999;
+    pointer-events: none;
+    transform: translate(-50%,-50%);
+    transition: transform 0.1s ease, width 0.3s, height 0.3s;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 2px solid var(--yellow);
+    border-radius: 50%;
+    position: fixed; z-index: 99998;
+    pointer-events: none;
+    transform: translate(-50%,-50%);
+    transition: transform 0.15s ease, width 0.3s, height 0.3s, opacity 0.3s;
+    opacity: 0.6;
+  }
+  a:hover ~ .cursor, button:hover ~ .cursor { width:18px; height:18px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black); }
+  ::-webkit-scrollbar-thumb { background: var(--yellow); border-radius: 2px; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; width: 100%; z-index: 1000;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 60px;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(245,168,0,0.15);
+    transition: padding 0.3s;
+  }
+  nav.scrolled { padding: 12px 60px; }
+
+  .nav-logo {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none;
+  }
+  .nav-logo-img {
+    width: 52px; height: 52px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px rgba(245,168,0,0.4));
+  }
+  .nav-logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--white); }
+  .nav-logo-text span { color: var(--yellow); }
+
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a {
+    color: var(--white); text-decoration: none; font-size: 13px;
+    font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+    position: relative; transition: color 0.3s;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 2px; background: var(--yellow);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--yellow); }
+  .nav-links a:hover::after { width: 100%; }
+
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+
+  .lang-toggle {
+    display: flex; gap: 0;
+    border: 1px solid var(--yellow);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .lang-btn {
+    background: none; border: none; color: var(--white);
+    padding: 6px 14px; font-size: 12px; font-weight: 700;
+    letter-spacing: 1px; cursor: pointer; transition: all 0.3s;
+    font-family: 'Barlow', sans-serif;
+  }
+  .lang-btn.active { background: var(--yellow); color: var(--black); }
+  .lang-btn:hover:not(.active) { background: rgba(245,168,0,0.15); }
+
+  .nav-cta {
+    background: var(--yellow); color: var(--black);
+    padding: 10px 24px; border-radius: 4px;
+    font-weight: 900; font-size: 13px; letter-spacing: 1px;
+    text-decoration: none; text-transform: uppercase;
+    transition: all 0.3s;
+    box-shadow: 0 0 20px rgba(245,168,0,0.3);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nav-cta:hover {
+    background: var(--yellow-light);
+    box-shadow: 0 0 40px rgba(245,168,0,0.6);
+    transform: translateY(-2px);
+  }
+
+  /* Utility Classes for Responsive Visibility */
+  .mobile-only { display: none !important; }
+  .desktop-only { display: inline-flex !important; }
+
+  /* Hamburger Menu Button */
+  .hamburger {
+    width: 28px; height: 20px;
+    flex-direction: column; justify-content: space-between;
+    cursor: pointer; background: transparent; border: none;
+    padding: 0; z-index: 1001;
+  }
+  .hamburger span {
+    display: block; width: 100%; height: 2px;
+    background: var(--white); border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  /* Mobile Drawer Menu */
+  .drawer-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px); z-index: 1999;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+  .mobile-drawer {
+    position: fixed; top: 0; right: -100%; width: 280px; height: 100vh;
+    background: var(--gray); z-index: 2000; box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+    display: flex; flex-direction: column; padding: 30px 24px;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .mobile-drawer.open { right: 0; }
+
+  .drawer-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 40px; padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .drawer-logo { width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(245,168,0,0.3)); }
+  .drawer-close {
+    background: none; border: none; color: var(--white);
+    font-size: 28px; cursor: pointer; line-height: 1; padding: 5px;
+    transition: color 0.3s;
+  }
+  .drawer-close:hover { color: var(--yellow); }
+
+  .drawer-links { list-style: none; display: flex; flex-direction: column; gap: 24px; }
+  .drawer-links a {
+    color: var(--white); text-decoration: none; font-size: 20px;
+    font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    font-family: 'Barlow Condensed', sans-serif; transition: color 0.3s;
+  }
+  .drawer-links a:hover { color: var(--yellow); }
+
+  .drawer-contact {
+    margin-top: auto; display: flex; flex-direction: column; gap: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08); padding-top: 30px;
+  }
+  .drawer-contact a {
+    color: #bbb; text-decoration: none; font-size: 14px;
+    display: flex; align-items: center; gap: 12px; transition: color 0.3s;
+  }
+  .drawer-contact a:hover { color: var(--yellow); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    position: relative; overflow: hidden;
+    padding-top: 88px;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 70% 50%, rgba(245,168,0,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(245,168,0,0.05) 0%, transparent 50%);
+  }
+  .hero-grid-pattern {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(245,168,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,168,0,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPan 20s linear infinite;
+  }
+  @keyframes gridPan { from { transform: translateY(0); } to { transform: translateY(60px); } }
+
+  .hero-left {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 80px 60px 80px 80px;
+    position: relative; z-index: 2;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(245,168,0,0.1); border: 1px solid rgba(245,168,0,0.3);
+    padding: 8px 18px; border-radius: 100px;
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--yellow);
+    margin-bottom: 32px;
+    animation: fadeSlideUp 0.8s ease both;
+    align-self: flex-start;
+  }
+  .hero-badge span { width:6px; height:6px; background:var(--yellow); border-radius:50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.5)} }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 8vw, 96px);
+    line-height: 0.95;
+    letter-spacing: 2px;
+    animation: fadeSlideUp 0.8s 0.2s ease both;
+  }
+  .hero-title .line-yellow { color: var(--yellow); }
+  .hero-title .line-outline {
+    -webkit-text-stroke: 2px var(--white);
+    color: transparent;
+  }
+
+  .hero-subtitle {
+    font-size: 17px; font-weight: 300; color: #ccc;
+    margin-top: 24px; max-width: 420px; line-height: 1.7;
+    animation: fadeSlideUp 0.8s 0.4s ease both;
+  }
+
+  .hero-stats {
+    display: flex; gap: 40px; margin-top: 40px;
+    animation: fadeSlideUp 0.8s 0.5s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 44px; color: var(--yellow); line-height: 1; }
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
+
+  .hero-buttons {
+    display: flex; gap: 16px; margin-top: 44px;
+    animation: fadeSlideUp 0.8s 0.6s ease both;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--yellow); color: var(--black);
+    padding: 16px 36px; border-radius: 4px;
+    font-weight: 900; font-size: 14px; letter-spacing: 1px;
+    text-transform: uppercase; text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 8px 32px rgba(245,168,0,0.35);
+    position: relative; overflow: hidden;
+  }
+  .btn-primary::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .btn-primary:hover::before { transform: translateX(100%); }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 48px rgba(245,168,0,0.5);
+  }
+
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 10px;
+    border: 2px solid rgba(255,255,255,0.3); color: var(--white);
+    padding: 16px 36px; border-radius: 4px;
+    font-weight: 700; font-size: 14px; letter-spacing: 1px;
+    text-transform: uppercase; text-decoration: none;
+    transition: all 0.3s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--yellow); color: var(--yellow);
+    transform: translateY(-3px);
+  }
+
+  .hero-right {
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 2; padding: 60px;
+  }
+  .hero-image-container {
+    position: relative; width: 100%; max-width: 500px;
+    animation: heroFloat 0.8s 0.3s ease both;
+  }
+  @keyframes heroFloat {
+    from { opacity: 0; transform: translateX(40px) scale(0.95); }
+    to { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  .hero-img-main {
+    width: 100%; border-radius: 12px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    object-fit: cover; height: 480px;
+  }
+  .hero-img-overlay {
+    position: absolute; bottom: -20px; left: -30px;
+    width: 200px; height: 160px;
+    border-radius: 8px; overflow: hidden;
+    border: 3px solid var(--yellow);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+  .hero-img-overlay img { width:100%; height:100%; object-fit:cover; }
+  .hero-glow {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 120%; height: 120%;
+    background: radial-gradient(ellipse, rgba(245,168,0,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+  @keyframes glowPulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+
+  .hero-scroll-indicator {
+    position: absolute; bottom: 40px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--text-muted); font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; z-index: 2;
+    animation: fadeSlideUp 1s 1s ease both;
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--yellow), transparent);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* TICKER */
+  .ticker-wrap {
+    background: var(--yellow); overflow: hidden;
+    padding: 14px 0;
+  }
+  .ticker-track {
+    display: flex; gap: 0;
+    animation: ticker 30s linear infinite;
+    width: max-content;
+  }
+  .ticker-item {
+    display: flex; align-items: center; gap: 20px;
+    padding: 0 30px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 3px;
+    color: var(--black); white-space: nowrap;
+  }
+  .ticker-dot { width: 6px; height: 6px; background: var(--black); border-radius: 50%; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* SECTION COMMON */
+  section { padding: 120px 80px; }
+  .section-label {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 12px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--yellow);
+    margin-bottom: 20px;
+  }
+  .section-label::before {
+    content: ''; width: 30px; height: 2px; background: var(--yellow);
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 6vw, 72px);
+    line-height: 1; letter-spacing: 2px;
+  }
+  .section-title span { color: var(--yellow); }
+
+  /* ABOUT */
+  #about {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    align-items: center;
+    background: linear-gradient(135deg, var(--gray) 0%, var(--black) 100%);
+  }
+  .about-text p { font-size: 17px; color: #bbb; line-height: 1.8; margin-top: 24px; }
+  .about-features { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .feature-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    padding: 20px; background: rgba(245,168,0,0.06);
+    border: 1px solid rgba(245,168,0,0.15); border-radius: 8px;
+    transition: all 0.3s;
+  }
+  .feature-item:hover { background: rgba(245,168,0,0.12); border-color: var(--yellow); transform: translateY(-4px); }
+  .feature-icon { font-size: 28px; flex-shrink: 0; }
+  .feature-label { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .feature-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  .about-visual { position: relative; }
+  .about-img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .about-img-grid img {
+    width: 100%; border-radius: 8px; object-fit: cover;
+    transition: transform 0.4s;
+  }
+  .about-img-grid img:hover { transform: scale(1.03); }
+  .about-img-grid img:first-child { height: 280px; grid-column: span 2; }
+  .about-img-grid img:not(:first-child) { height: 160px; }
+  .about-badge {
+    position: absolute; top: -20px; right: -20px;
+    width: 120px; height: 120px;
+    background: var(--yellow); border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    animation: rotateSlow 12s linear infinite;
+    box-shadow: 0 0 40px rgba(245,168,0,0.4);
+  }
+  .about-badge-num { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: var(--black); line-height: 1; }
+  .about-badge-text { font-size: 10px; font-weight: 900; color: var(--black); letter-spacing: 1px; text-transform: uppercase; text-align: center; }
+  @keyframes rotateSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* SERVICES */
+  #services { background: var(--black); }
+  .services-header { text-align: center; margin-bottom: 70px; }
+  .services-header p { font-size: 17px; color: #bbb; max-width: 580px; margin: 20px auto 0; line-height: 1.7; }
+  .services-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+  }
+  .service-card {
+    background: var(--gray); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px; overflow: hidden;
+    transition: all 0.4s; position: relative;
+    cursor: pointer;
+  }
+  .service-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(245,168,0,0.85) 100%);
+    opacity: 0; transition: opacity 0.4s;
+    z-index: 1;
+  }
+  .service-card:hover::before { opacity: 1; }
+  .service-card:hover { transform: translateY(-8px) scale(1.02); border-color: var(--yellow); box-shadow: 0 20px 60px rgba(245,168,0,0.2); }
+  .service-img {
+    width: 100%; height: 200px; object-fit: cover;
+    transition: transform 0.5s;
+  }
+  .service-card:hover .service-img { transform: scale(1.1); }
+  .service-body {
+    padding: 20px; position: relative; z-index: 2;
+    transition: all 0.4s;
+  }
+  .service-icon { font-size: 28px; margin-bottom: 10px; }
+  .service-name { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+  .service-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-top: 8px; transition: color 0.3s; }
+  .service-card:hover .service-desc { color: rgba(0,0,0,0.8); }
+  .service-card:hover .service-name { color: var(--black); }
+  .service-arrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 14px; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--yellow);
+    transition: all 0.3s; text-decoration: none;
+  }
+  .service-card:hover .service-arrow { color: var(--black); gap: 12px; }
+
+  /* PROCESS */
+  #process {
+    background: linear-gradient(135deg, rgba(245,168,0,0.05) 0%, var(--black) 100%);
+    text-align: center;
+  }
+  .process-steps {
+    display: flex; gap: 0; margin-top: 70px;
+    position: relative;
+  }
+  .process-steps::before {
+    content: ''; position: absolute;
+    top: 36px; left: 10%; right: 10%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--yellow), transparent);
+  }
+  .process-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 0 20px; }
+  .step-num {
+    width: 72px; height: 72px;
+    border: 2px solid var(--yellow); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--yellow);
+    background: var(--black); position: relative; z-index: 1;
+    transition: all 0.3s;
+  }
+  .process-step:hover .step-num { background: var(--yellow); color: var(--black); box-shadow: 0 0 30px rgba(245,168,0,0.5); }
+  .step-title { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+  .step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; max-width: 200px; }
+
+  /* REVIEWS */
+  #reviews { background: var(--gray); }
+  .reviews-header { text-align: center; margin-bottom: 70px; }
+  .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .review-card {
+    background: var(--black); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 32px;
+    transition: all 0.4s; position: relative;
+  }
+  .review-card::before {
+    content: '"';
+    position: absolute; top: 20px; right: 24px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 80px; color: rgba(245,168,0,0.1);
+    line-height: 1;
+  }
+  .review-card:hover { transform: translateY(-6px); border-color: rgba(245,168,0,0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+  .review-stars { color: var(--yellow); font-size: 18px; letter-spacing: 2px; margin-bottom: 16px; }
+  .review-text { font-size: 15px; color: #ccc; line-height: 1.75; font-style: italic; }
+  .review-author { display: flex; align-items: center; gap: 14px; margin-top: 24px; }
+  .review-avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--gray2); overflow: hidden;
+    border: 2px solid var(--yellow);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    object-fit: cover;
+  }
+  .review-name { font-weight: 700; font-size: 15px; }
+  .review-location { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* CTA BANNER */
+  #cta-banner {
+    background: var(--yellow); padding: 80px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+  #cta-banner::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent, transparent 20px,
+      rgba(0,0,0,0.03) 20px, rgba(0,0,0,0.03) 40px
+    );
+  }
+  .cta-text { position: relative; z-index: 1; }
+  .cta-text h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(32px, 6vw, 64px); color: var(--black); line-height: 1; letter-spacing: 2px; }
+  .cta-text p { font-size: 18px; color: rgba(0,0,0,0.7); margin-top: 10px; }
+  .cta-buttons { display: flex; gap: 16px; flex-wrap: wrap; position: relative; z-index: 1; }
+  .cta-btn-dark {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--black); color: var(--white);
+    padding: 16px 32px; border-radius: 4px;
+    font-weight: 900; font-size: 14px; letter-spacing: 1px;
+    text-transform: uppercase; text-decoration: none;
+    transition: all 0.3s;
+  }
+  .cta-btn-dark:hover { background: var(--gray); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+  .cta-btn-outline-dark {
+    display: inline-flex; align-items: center; gap: 10px;
+    border: 2px solid var(--black); color: var(--black);
+    padding: 16px 32px; border-radius: 4px;
+    font-weight: 900; font-size: 14px; letter-spacing: 1px;
+    text-transform: uppercase; text-decoration: none;
+    transition: all 0.3s;
+  }
+  .cta-btn-outline-dark:hover { background: var(--black); color: var(--yellow); transform: translateY(-3px); }
+
+  /* CONTACT */
+  #contact {
+    background: var(--black);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
+  }
+  .contact-info h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(40px, 8vw, 56px); letter-spacing: 2px; line-height: 1; margin-bottom: 30px; }
+  .contact-info h2 span { color: var(--yellow); }
+  .contact-info p { font-size: 16px; color: #bbb; line-height: 1.8; margin-bottom: 40px; }
+  .contact-items { display: flex; flex-direction: column; gap: 20px; }
+  .contact-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 20px 24px; background: var(--gray);
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 8px;
+    transition: all 0.3s; text-decoration: none; color: var(--white);
+  }
+  .contact-item:hover { border-color: var(--yellow); background: rgba(245,168,0,0.08); transform: translateX(6px); }
+  .contact-item-icon {
+    width: 44px; height: 44px; min-width: 44px;
+    background: rgba(245,168,0,0.15); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .contact-item-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--yellow); margin-bottom: 4px; }
+  .contact-item-value { font-size: 15px; font-weight: 600; }
+
+  .contact-form-side { padding-top: 20px; }
+  .contact-form-side h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 1px; margin-bottom: 30px; }
+  .contact-form-side h3 span { color: var(--yellow); }
+
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--yellow); margin-bottom: 8px; }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%; background: var(--gray); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--white); padding: 14px 18px; border-radius: 6px;
+    font-family: 'Barlow', sans-serif; font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    -webkit-appearance: none;
+    outline: none;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--yellow);
+    box-shadow: 0 0 0 3px rgba(245,168,0,0.15);
+  }
+  .form-group textarea { resize: vertical; min-height: 120px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .submit-btn {
+    width: 100%; background: var(--yellow); color: var(--black);
+    border: none; padding: 18px; border-radius: 6px;
+    font-family: 'Barlow', sans-serif; font-weight: 900; font-size: 14px;
+    letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 8px 30px rgba(245,168,0,0.3);
+    position: relative; overflow: hidden;
+  }
+  .submit-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.5s;
+  }
+  .submit-btn:hover::before { transform: translateX(100%); }
+  .submit-btn:hover {
+    background: var(--yellow-light);
+    box-shadow: 0 14px 45px rgba(245,168,0,0.5);
+    transform: translateY(-2px);
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--gray); border-top: 1px solid rgba(245,168,0,0.15);
+    padding: 60px 80px 30px;
+  }
+  .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 60px; margin-bottom: 50px; }
+  .footer-brand p { color: var(--text-muted); font-size: 14px; line-height: 1.8; margin-top: 16px; max-width: 280px; }
+  .footer-logo { display: flex; align-items: center; gap: 10px; }
+  .footer-logo-img { width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(245,168,0,0.3)); }
+  .footer-logo-text { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; }
+  .footer-logo-text span { color: var(--yellow); }
+  .footer-col h4 { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--yellow); margin-bottom: 20px; }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 10px; }
+  .footer-col ul li a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: color 0.3s; display: flex; align-items: center; gap: 8px; }
+  .footer-col ul li a:hover { color: var(--white); padding-left: 4px; }
+  .footer-col ul li a::before { content: '›'; color: var(--yellow); font-size: 16px; }
+  .footer-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .footer-bottom p { font-size: 13px; color: var(--text-muted); }
+  .footer-bottom span { color: var(--yellow); }
+  .social-links { display: flex; gap: 12px; }
+  .social-link {
+    width: 38px; height: 38px;
+    border: 1px solid rgba(255,255,255,0.15); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; text-decoration: none; color: var(--white);
+    transition: all 0.3s;
+  }
+  .social-link:hover { border-color: var(--yellow); background: rgba(245,168,0,0.1); transform: translateY(-3px); }
+
+  /* Floating WA button */
+  .floating-wa {
+    position: fixed; bottom: 30px; right: 30px; z-index: 999;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: #25D366;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; text-decoration: none;
+    box-shadow: 0 8px 30px rgba(37,211,102,0.5);
+    animation: waBounce 2s ease-in-out infinite;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .floating-wa:hover {
+    transform: scale(1.15) !important;
+    box-shadow: 0 12px 40px rgba(37,211,102,0.7);
+    animation: none;
+  }
+  @keyframes waBounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .wa-pulse {
+    position: absolute; inset: -4px;
+    border-radius: 50%; border: 2px solid #25D366;
+    animation: waPulse 2s ease-in-out infinite;
+  }
+  @keyframes waPulse { 0%,100%{opacity:0.8;transform:scale(1)} 50%{opacity:0;transform:scale(1.4)} }
+
+  /* Scroll reveal */
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-left { opacity: 0; transform: translateX(-40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+  .reveal-right { opacity: 0; transform: translateX(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+
+  /* 3D card tilt */
+  .tilt-card { transform-style: preserve-3d; transition: transform 0.1s; }
+
+  /* lang hidden */
+  [data-lang="en"] { display: none; }
+  body.lang-en [data-lang="en"] { display: block; }
+  body.lang-en [data-lang="es"] { display: none; }
+  body.lang-en .lang-btn[data-set="en"] { background: var(--yellow); color: var(--black); }
+  body.lang-en .lang-btn[data-set="es"] { background: none; color: var(--white); }
+  body.lang-es .lang-btn[data-set="es"] { background: var(--yellow); color: var(--black); }
+  body.lang-es .lang-btn[data-set="en"] { background: none; color: var(--white); }
+
+  /* ========================================================================= */
+  /* RESPONSIVE ENHANCEMENTS */
+  /* ========================================================================= */
+
+  /* Fix for Cursor on Touch Screens */
+  @media (hover: none) and (pointer: coarse) {
+    .cursor, .cursor-ring { display: none !important; }
+    body { cursor: auto !important; }
+  }
+
+  @media (max-width: 1100px) {
+    .services-grid { grid-template-columns: repeat(2, 1fr); }
+    #contact { grid-template-columns: 1fr; }
+    #hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .footer-top { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    /* Visibility Toggle */
+    .desktop-only { display: none !important; }
+    .mobile-only { display: flex !important; }
+
+    /* Navbar Adjustment */
+    nav { padding: 12px 16px; }
+    .nav-links { display: none; }
+    .nav-logo-img { width: 36px; height: 36px; } 
+    .nav-logo-text { font-size: 18px; }
+    .lang-btn { padding: 6px 10px; font-size: 11px; }
+
+    /* General Section Padding */
+    section { padding: 60px 24px; }
+
+    /* Hero Fixes */
+    .hero-left { padding: 40px 24px; }
+    .hero-badge { margin-bottom: 24px; font-size: 10px; padding: 6px 14px; }
+    .hero-stats { gap: 20px; flex-wrap: wrap; margin-top: 30px; }
+    .stat-num { font-size: 32px; }
+    .hero-buttons { flex-direction: column; width: 100%; gap: 12px; margin-top: 30px; }
+    .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+
+    /* About Fixes */
+    #about { grid-template-columns: 1fr; gap: 50px; }
+    .about-features { grid-template-columns: 1fr; gap: 16px; }
+
+    /* Services Grid Fixes */
+    .services-grid { grid-template-columns: 1fr; }
+    .service-img { height: 240px; }
+
+    /* Process Diagram Vertical Flow */
+    .process-steps { flex-direction: column; gap: 40px; margin-top: 40px; }
+    .process-step { padding: 0; }
+    .process-steps::before {
+      top: 0; bottom: 0; left: 50%; right: auto; width: 2px; height: 100%;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, transparent, var(--yellow), transparent);
+    }
+
+    /* Reviews Grid Fix */
+    .reviews-grid { grid-template-columns: 1fr; }
+
+    /* CTA Banner Fix */
+    #cta-banner { flex-direction: column; gap: 30px; padding: 60px 24px; text-align: center; }
+    .cta-buttons { flex-direction: column; width: 100%; justify-content: center; }
+    .cta-btn-dark, .cta-btn-outline-dark { width: 100%; justify-content: center; }
+
+    /* Contact Form Fix */
+    .form-row { grid-template-columns: 1fr; }
+
+    /* Footer Fixes */
+    footer { padding: 60px 24px 30px; }
+    .footer-top { grid-template-columns: 1fr; gap: 40px; }
+    .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+  }
+</style>
+</head>
+<body class="lang-es">
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<a href="https://wa.me/34626856596" target="_blank" class="floating-wa" title="WhatsApp">
+  <span class="wa-pulse"></span>
+  💬
+</a>
+
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    <img src="https://cdn.shopify.com/s/files/1/0992/7334/3289/files/sam.png?v=1780072140" class="nav-logo-img" alt="SAM Reformas Logo">
+    <span class="nav-logo-text">SAM <span>REFORMAS</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about"><span data-lang="es">Nosotros</span><span data-lang="en">About</span></a></li>
+    <li><a href="#services"><span data-lang="es">Servicios</span><span data-lang="en">Services</span></a></li>
+    <li><a href="#process"><span data-lang="es">Proceso</span><span data-lang="en">Process</span></a></li>
+    <li><a href="#reviews"><span data-lang="es">Reseñas</span><span data-lang="en">Reviews</span></a></li>
+    <li><a href="#contact"><span data-lang="es">Contacto</span><span data-lang="en">Contact</span></a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-set="es" onclick="setLang('es')">ES</button>
+      <button class="lang-btn" data-set="en" onclick="setLang('en')">EN</button>
+    </div>
+    
+    <a href="https://wa.me/34626856596" target="_blank" class="nav-cta desktop-only">
+      💬 WhatsApp
+    </a>
+
+    <button class="hamburger mobile-only" onclick="toggleDrawer()">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-header">
+    <img src="https://cdn.shopify.com/s/files/1/0992/7334/3289/files/sam.png?v=1780072140" class="drawer-logo" alt="SAM Reformas">
+    <button class="drawer-close" onclick="toggleDrawer()">✕</button>
+  </div>
+  <ul class="drawer-links">
+    <li><a href="#about" onclick="toggleDrawer()"><span data-lang="es">Nosotros</span><span data-lang="en">About</span></a></li>
+    <li><a href="#services" onclick="toggleDrawer()"><span data-lang="es">Servicios</span><span data-lang="en">Services</span></a></li>
+    <li><a href="#process" onclick="toggleDrawer()"><span data-lang="es">Proceso</span><span data-lang="en">Process</span></a></li>
+    <li><a href="#reviews" onclick="toggleDrawer()"><span data-lang="es">Reseñas</span><span data-lang="en">Reviews</span></a></li>
+    <li><a href="#contact" onclick="toggleDrawer()"><span data-lang="es">Contacto</span><span data-lang="en">Contact</span></a></li>
+  </ul>
+  <div class="drawer-contact">
+    <a href="https://wa.me/34626856596" target="_blank">💬 WhatsApp: (+34) 626 856 596</a>
+    <a href="tel:602602002">📞 <span data-lang="es">Teléfono</span><span data-lang="en">Phone</span>: 602 602 002</a>
+    <a href="mailto:reformas.sam@gmail.com">✉️ Email: reformas.sam@gmail.com</a>
+  </div>
+</div>
+
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-pattern"></div>
+  <div class="hero-left">
+    <div class="hero-badge">
+      <span></span>
+      <span data-lang="es">Reformas del Hogar en San Sebastián</span>
+      <span data-lang="en">Home Renovations in San Sebastián</span>
+    </div>
+    <h1 class="hero-title">
+      <div data-lang="es">TRANSFORMA<br><span class="line-yellow">TU HOGAR</span><br><span class="line-outline">HOY</span></div>
+      <div data-lang="en">TRANSFORM<br><span class="line-yellow">YOUR HOME</span><br><span class="line-outline">TODAY</span></div>
+    </h1>
+    <p class="hero-subtitle">
+      <span data-lang="es">Los mejores profesionales trabajando para ti. Reformas integrales, cocina, baño, electricidad y mucho más.</span>
+      <span data-lang="en">The best professionals working for you. Full renovations, kitchen, bathroom, electricity and much more.</span>
+    </p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">500+</div><div class="stat-label"><span data-lang="es">Proyectos</span><span data-lang="en">Projects</span></div></div>
+      <div class="stat"><div class="stat-num">8+</div><div class="stat-label"><span data-lang="es">Años Exp.</span><span data-lang="en">Years Exp.</span></div></div>
+      <div class="stat"><div class="stat-num">★5.0</div><div class="stat-label"><span data-lang="es">Valoración</span><span data-lang="en">Rating</span></div></div>
+    </div>
+    <div class="hero-buttons">
+      <a href="https://wa.me/34626856596" target="_blank" class="btn-primary">
+        💬 <span data-lang="es">Pedir Presupuesto</span><span data-lang="en">Get a Quote</span>
+      </a>
+      <a href="tel:602602002" class="btn-secondary">
+        📞 602 602 002
+      </a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-image-container">
+      <div class="hero-glow"></div>
+      <img src="/mnt/user-data/uploads/qeriii_3.jpg" class="hero-img-main" alt="Reforma de baño" onerror="this.src='https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&q=80'">
+      <div class="hero-img-overlay">
+        <img src="/mnt/user-data/uploads/qeriii2.jpg" alt="Reforma integral" onerror="this.src='https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&q=80'">
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll-indicator">
+    <div class="scroll-line"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<div class="ticker-wrap">
+  <div class="ticker-track" id="ticker">
+    <div class="ticker-item"><span class="ticker-dot"></span> REFORMA COCINA</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> REFORMA BAÑO</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> ELECTRICIDAD</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> FONTANERÍA</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> CARPINTERÍA</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> PINTURA</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> PLADUR</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> SUELOS</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> PRESUPUESTO GRATIS</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> REFORMA COCINA</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> REFORMA BAÑO</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> ELECTRICIDAD</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> FONTANERÍA</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> CARPINTERÍA</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> PINTURA</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> PLADUR</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> SUELOS</div>
+    <div class="ticker-item"><span class="ticker-dot"></span> PRESUPUESTO GRATIS</div>
+  </div>
+</div>
+
+<section id="about">
+  <div class="about-text reveal-left">
+    <div class="section-label">
+      <span data-lang="es">Sobre Nosotros</span>
+      <span data-lang="en">About Us</span>
+    </div>
+    <h2 class="section-title">
+      <span data-lang="es">CALIDAD QUE<br><span>HABLA</span> POR SÍ SOLA</span>
+      <span data-lang="en">QUALITY THAT<br><span>SPEAKS</span> FOR ITSELF</span>
+    </h2>
+    <p>
+      <span data-lang="es">En SAM Reformas somos especialistas en la transformación integral de hogares y negocios en el País Vasco. Con más de 8 años de experiencia, nuestro equipo de profesionales garantiza resultados excepcionales en cada proyecto.</span>
+      <span data-lang="en">At SAM Reformas we specialize in the comprehensive transformation of homes and businesses in the Basque Country. With over 8 years of experience, our team of professionals guarantees exceptional results on every project.</span>
+    </p>
+    <div class="about-features">
+      <div class="feature-item">
+        <div class="feature-icon">🏆</div>
+        <div>
+          <div class="feature-label"><span data-lang="es">Garantía Total</span><span data-lang="en">Full Guarantee</span></div>
+          <div class="feature-desc"><span data-lang="es">Todos nuestros trabajos con garantía de calidad</span><span data-lang="en">All our work with quality guarantee</span></div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">⚡</div>
+        <div>
+          <div class="feature-label"><span data-lang="es">Rapidez</span><span data-lang="en">Fast Delivery</span></div>
+          <div class="feature-desc"><span data-lang="es">Cumplimos siempre con los plazos acordados</span><span data-lang="en">We always meet agreed deadlines</span></div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">💰</div>
+        <div>
+          <div class="feature-label"><span data-lang="es">Precio Justo</span><span data-lang="en">Fair Price</span></div>
+          <div class="feature-desc"><span data-lang="es">Presupuesto sin sorpresas, transparente</span><span data-lang="en">Budget with no surprises, transparent</span></div>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🛠️</div>
+        <div>
+          <div class="feature-label"><span data-lang="es">Materiales Top</span><span data-lang="en">Top Materials</span></div>
+          <div class="feature-desc"><span data-lang="es">Solo usamos materiales de primera calidad</span><span data-lang="en">We only use top-quality materials</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="about-visual reveal-right">
+    <div class="about-badge">
+      <div class="about-badge-num">8+</div>
+      <div class="about-badge-text">Años<br>Exp.</div>
+    </div>
+    <div class="about-img-grid">
+      <img src="/mnt/user-data/uploads/qeriii_3.jpg" alt="Reforma baño" onerror="this.src='https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&q=80'">
+      <img src="/mnt/user-data/uploads/qeriii2.jpg" alt="Reforma cocina" onerror="this.src='https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&q=80'">
+      <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80" alt="Carpintería">
+    </div>
+  </div>
+</section>
+
+<section id="services">
+  <div class="services-header reveal">
+    <div class="section-label" style="justify-content:center">
+      <span data-lang="es">Nuestros Servicios</span>
+      <span data-lang="en">Our Services</span>
+    </div>
+    <h2 class="section-title">
+      <span data-lang="es">TODO LO QUE<br><span>NECESITAS</span></span>
+      <span data-lang="en">EVERYTHING YOU<br><span>NEED</span></span>
+    </h2>
+    <p>
+      <span data-lang="es">Soluciones integrales para tu hogar. Presupuesto gratis, sin compromiso, en 24 horas.</span>
+      <span data-lang="en">Comprehensive solutions for your home. Free quote, no obligation, within 24 hours.</span>
+    </p>
+  </div>
+  <div class="services-grid">
+
+    <div class="service-card tilt-card reveal">
+      <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" class="service-img" alt="Reforma Cocina">
+      <div class="service-body">
+        <div class="service-icon">🍳</div>
+        <div class="service-name"><span data-lang="es">Reforma Cocina</span><span data-lang="en">Kitchen Renovation</span></div>
+        <div class="service-desc"><span data-lang="es">Diseño y reforma completa de cocinas a medida, mobiliario, encimeras y electrodomésticos.</span><span data-lang="en">Custom kitchen design and full renovation, furniture, countertops and appliances.</span></div>
+        <a href="https://wa.me/34626856596" target="_blank" class="service-arrow"><span data-lang="es">Consultar</span><span data-lang="en">Enquire</span> →</a>
+      </div>
+    </div>
+
+    <div class="service-card tilt-card reveal">
+      <img src="https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=400&q=80" class="service-img" alt="Reforma Baño">
+      <div class="service-body">
+        <div class="service-icon">🚿</div>
+        <div class="service-name"><span data-lang="es">Reforma Baño</span><span data-lang="en">Bathroom Renovation</span></div>
+        <div class="service-desc"><span data-lang="es">Reforma integral de baños con diseños modernos. Regalo: taza con cisterna incluida.</span><span data-lang="en">Full bathroom renovation with modern designs. Gift: toilet with cistern included.</span></div>
+        <a href="https://wa.me/34626856596" target="_blank" class="service-arrow"><span data-lang="es">Consultar</span><span data-lang="en">Enquire</span> →</a>
+      </div>
+    </div>
+
+    <div class="service-card tilt-card reveal">
+      <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&q=80" class="service-img" alt="Electricidad">
+      <div class="service-body">
+        <div class="service-icon">⚡</div>
+        <div class="service-name"><span data-lang="es">Electricidad</span><span data-lang="en">Electrical Work</span></div>
+        <div class="service-desc"><span data-lang="es">Instalaciones eléctricas, cuadros eléctricos, puntos de luz, domótica y más.</span><span data-lang="en">Electrical installations, circuit boards, lighting points, home automation and more.</span></div>
+        <a href="https://wa.me/34626856596" target="_blank" class="service-arrow"><span data-lang="es">Consultar</span><span data-lang="en">Enquire</span> →</a>
+      </div>
+    </div>
+
+    <div class="service-card tilt-card reveal">
+      <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&q=80" class="service-img" alt="Fontanería">
+      <div class="service-body">
+        <div class="service-icon">🔧</div>
+        <div class="service-name"><span data-lang="es">Fontanería</span><span data-lang="en">Plumbing</span></div>
+        <div class="service-desc"><span data-lang="es">Instalación y reparación de tuberías, grifos, desagües, calefacción y agua caliente.</span><span data-lang="en">Installation and repair of pipes, faucets, drains, heating and hot water systems.</span></div>
+        <a href="https://wa.me/34626856596" target="_blank" class="service-arrow"><span data-lang="es">Consultar</span><span data-lang="en">Enquire</span> →</a>
+      </div>
+    </div>
+
+    <div class="service-card tilt-card reveal">
+      <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" class="service-img" alt="Carpintería">
+      <div class="service-body">
+        <div class="service-icon">🪵</div>
+        <div class="service-name"><span data-lang="es">Carpintería</span><span data-lang="en">Carpentry</span></div>
+        <div class="service-desc"><span data-lang="es">Puertas, ventanas, armarios a medida, tarimas y todo tipo de trabajos en madera.</span><span data-lang="en">Doors, windows, custom wardrobes, flooring and all kinds of woodwork.</span></div>
+        <a href="https://wa.me/34626856596" target="_blank" class="service-arrow"><span data-lang="es">Consultar</span><span data-lang="en">Enquire</span> →</a>
+      </div>
+    </div>
+
+    <div class="service-card tilt-card reveal">
+      <img src="https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=400&q=80" class="service-img" alt="Pintura">
+      <div class="service-body">
+        <div class="service-icon">🎨</div>
+        <div class="service-name"><span data-lang="es">Pintura</span><span data-lang="en">Painting</span></div>
+        <div class="service-desc"><span data-lang="es">Pintura interior y exterior, acabados decorativos, microcemento y efectos especiales.</span><span data-lang="en">Interior and exterior painting, decorative finishes, microcement and special effects.</span></div>
+        <a href="https://wa.me/34626856596" target="_blank" class="service-arrow"><span data-lang="es">Consultar</span><span data-lang="en">Enquire</span> →</a>
+      </div>
+    </div>
+
+    <div class="service-card tilt-card reveal">
+      <img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&q=80" class="service-img" alt="Pladur">
+      <div class="service-body">
+        <div class="service-icon">🏗️</div>
+        <div class="service-name"><span data-lang="es">Pladur</span><span data-lang="en">Plasterboard</span></div>
+        <div class="service-desc"><span data-lang="es">Tabiques, techos, trasdosados y todo tipo de trabajos con pladur y escayola.</span><span data-lang="en">Partitions, ceilings, cladding and all types of plasterboard and plaster work.</span></div>
+        <a href="https://wa.me/34626856596" target="_blank" class="service-arrow"><span data-lang="es">Consultar</span><span data-lang="en">Enquire</span> →</a>
+      </div>
+    </div>
+
+    <div class="service-card tilt-card reveal">
+      <img src="https://images.unsplash.com/photo-1585128792020-803d29415281?w=400&q=80" class="service-img" alt="Suelos">
+      <div class="service-body">
+        <div class="service-icon">🪨</div>
+        <div class="service-name"><span data-lang="es">Suelos & Alicatados</span><span data-lang="en">Flooring & Tiling</span></div>
+        <div class="service-desc"><span data-lang="es">Colocación de suelos, azulejos, gres, mármol y todo tipo de revestimientos.</span><span data-lang="en">Installation of floors, tiles, stoneware, marble and all kinds of coverings.</span></div>
+        <a href="https://wa.me/34626856596" target="_blank" class="service-arrow"><span data-lang="es">Consultar</span><span data-lang="en">Enquire</span> →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center; margin-top:60px;" class="reveal">
+    <a href="https://wa.me/34626856596" target="_blank" class="btn-primary" style="display:inline-flex;">
+      💬 <span data-lang="es">Ver todos los servicios en WhatsApp</span><span data-lang="en">See all services on WhatsApp</span>
+    </a>
+  </div>
+</section>
+
+<section id="process">
+  <div class="reveal">
+    <div class="section-label" style="justify-content:center">
+      <span data-lang="es">Cómo Trabajamos</span>
+      <span data-lang="en">How We Work</span>
+    </div>
+    <h2 class="section-title" style="text-align:center">
+      <span data-lang="es">EL PROCESO<br><span>ES SIMPLE</span></span>
+      <span data-lang="en">THE PROCESS<br><span>IS SIMPLE</span></span>
+    </h2>
+  </div>
+  <div class="process-steps reveal">
+    <div class="process-step">
+      <div class="step-num">01</div>
+      <div class="step-title"><span data-lang="es">Contacto</span><span data-lang="en">Contact</span></div>
+      <div class="step-desc"><span data-lang="es">Llámanos o escríbenos por WhatsApp con tu idea.</span><span data-lang="en">Call us or message us on WhatsApp with your idea.</span></div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">02</div>
+      <div class="step-title"><span data-lang="es">Visita Gratis</span><span data-lang="en">Free Visit</span></div>
+      <div class="step-desc"><span data-lang="es">Visitamos tu espacio para valorar el proyecto sin coste.</span><span data-lang="en">We visit your space to assess the project at no cost.</span></div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">03</div>
+      <div class="step-title"><span data-lang="es">Presupuesto</span><span data-lang="en">Quote</span></div>
+      <div class="step-desc"><span data-lang="es">Recibes un presupuesto detallado y transparente.</span><span data-lang="en">You receive a detailed, transparent quote.</span></div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">04</div>
+      <div class="step-title"><span data-lang="es">Ejecución</span><span data-lang="en">Execution</span></div>
+      <div class="step-desc"><span data-lang="es">Nuestro equipo trabaja con precisión y puntualidad.</span><span data-lang="en">Our team works with precision and punctuality.</span></div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">05</div>
+      <div class="step-title"><span data-lang="es">Entrega</span><span data-lang="en">Delivery</span></div>
+      <div class="step-desc"><span data-lang="es">Tu hogar transformado, con garantía de satisfacción.</span><span data-lang="en">Your home transformed, with a satisfaction guarantee.</span></div>
+    </div>
+  </div>
+  <div style="text-align:center; margin-top:60px;" class="reveal">
+    <a href="https://wa.me/34626856596" target="_blank" class="btn-primary" style="display:inline-flex;">
+      💬 <span data-lang="es">Solicitar Visita Gratis</span><span data-lang="en">Request Free Visit</span>
+    </a>
+  </div>
+</section>
+
+<section id="reviews">
+  <div class="reviews-header reveal">
+    <div class="section-label" style="justify-content:center">
+      <span data-lang="es">Testimonios</span>
+      <span data-lang="en">Testimonials</span>
+    </div>
+    <h2 class="section-title">
+      <span data-lang="es">LO QUE DICEN<br><span>NUESTROS CLIENTES</span></span>
+      <span data-lang="en">WHAT OUR<br><span>CLIENTS SAY</span></span>
+    </h2>
+  </div>
+  <div class="reviews-grid">
+
+    <div class="review-card tilt-card reveal">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">
+        <span data-lang="es">"Reformaron nuestro baño completo en menos de 2 semanas. El resultado es increíble, parece sacado de una revista. Super profesionales y muy limpios con el trabajo. 100% recomendables."</span>
+        <span data-lang="en">"They renovated our full bathroom in less than 2 weeks. The result is incredible, looks like it's straight out of a magazine. Super professional and very tidy with their work. 100% recommended."</span>
+      </div>
+      <div class="review-author">
+        <div class="review-avatar">👩</div>
+        <div>
+          <div class="review-name">María González</div>
+          <div class="review-location">San Sebastián</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card tilt-card reveal">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">
+        <span data-lang="es">"La reforma integral de nuestra cocina quedó espectacular. Respetaron el presupuesto al céntimo y los plazos prometidos. Un servicio de 10 estrellas si pudiera darlo."</span>
+        <span data-lang="en">"The complete renovation of our kitchen turned out spectacular. They respected the budget to the penny and the promised deadlines. A 10-star service if I could give it."</span>
+      </div>
+      <div class="review-author">
+        <div class="review-avatar">👨</div>
+        <div>
+          <div class="review-name">Carlos Martínez</div>
+          <div class="review-location">Azkoitia</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card tilt-card reveal">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">
+        <span data-lang="es">"Contratamos a SAM para pintura y pladur de todo el piso. Muy atentos desde el primer momento, con precios muy competitivos. El trabajo quedó de lujo. ¡Repetiremos seguro!"</span>
+        <span data-lang="en">"We hired SAM for painting and plasterboard work in the entire flat. Very attentive from the start, with very competitive prices. The work was top class. We'll definitely use them again!"</span>
+      </div>
+      <div class="review-author">
+        <div class="review-avatar">👩</div>
+        <div>
+          <div class="review-name">Ana Ruiz</div>
+          <div class="review-location">San Sebastián</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card tilt-card reveal">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">
+        <span data-lang="es">"Instalación eléctrica completa en nuestro local. Rápidos, eficientes y sin interrupciones. El precio fue muy justo para la calidad entregada. Grandes profesionales."</span>
+        <span data-lang="en">"Complete electrical installation in our premises. Fast, efficient and without interruptions. The price was very fair for the quality delivered. Great professionals."</span>
+      </div>
+      <div class="review-author">
+        <div class="review-avatar">👨</div>
+        <div>
+          <div class="review-name">Iñaki Etxebarria</div>
+          <div class="review-location">Azkoitia</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card tilt-card reveal">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">
+        <span data-lang="es">"Fontanería y azulejos del baño perfectos. Vinieron a hacer el presupuesto el mismo día y empezaron la semana siguiente. El equipo es muy profesional y respetuoso."</span>
+        <span data-lang="en">"Plumbing and bathroom tiles were perfect. They came to give the quote the same day and started the following week. The team is very professional and respectful."</span>
+      </div>
+      <div class="review-author">
+        <div class="review-avatar">👩</div>
+        <div>
+          <div class="review-name">Lucía Fernández</div>
+          <div class="review-location">San Sebastián</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="review-card tilt-card reveal">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-text">
+        <span data-lang="es">"Los suelos y paredes del salón quedó preciosos. La atención al detalle es increíble. Ya les hemos recomendado a todos nuestros vecinos y amigos. ¡Gracias SAM!"</span>
+        <span data-lang="en">"The living room floors and walls turned out beautiful. The attention to detail is incredible. We've already recommended them to all our neighbours and friends. Thank you SAM!"</span>
+      </div>
+      <div class="review-author">
+        <div class="review-avatar">👨</div>
+        <div>
+          <div class="review-name">Javier López</div>
+          <div class="review-location">Azkoitia</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div id="cta-banner" class="reveal">
+  <div class="cta-text">
+    <h2><span data-lang="es">¿LISTO PARA<br>TRANSFORMAR TU HOGAR?</span><span data-lang="en">READY TO<br>TRANSFORM YOUR HOME?</span></h2>
+    <p><span data-lang="es">Presupuesto gratis · Sin compromiso · Respuesta en 24h</span><span data-lang="en">Free quote · No obligation · Response within 24h</span></p>
+  </div>
+  <div class="cta-buttons">
+    <a href="https://wa.me/34626856596" target="_blank" class="cta-btn-dark">
+      💬 WhatsApp
+    </a>
+    <a href="tel:602602002" class="cta-btn-dark">
+      📞 602 602 002
+    </a>
+    <a href="mailto:reformas.sam@gmail.com" class="cta-btn-outline-dark">
+      ✉️ Email
+    </a>
+  </div>
+</div>
+
+<section id="contact">
+  <div class="contact-info reveal-left">
+    <div class="section-label">
+      <span data-lang="es">Contacto</span>
+      <span data-lang="en">Contact</span>
+    </div>
+    <h2><span data-lang="es">HABLEMOS<br>DE TU <span>PROYECTO</span></span><span data-lang="en">LET'S TALK<br>ABOUT YOUR <span>PROJECT</span></span></h2>
+    <p><span data-lang="es">Estamos disponibles de lunes a domingo las 24 horas para atender tu consulta. Contacta con nosotros por el medio que prefieras.</span><span data-lang="en">We are available Monday to Sunday 24 hours to answer your queries. Contact us by your preferred method.</span></p>
+    <div class="contact-items">
+      <a href="https://wa.me/34626856596" target="_blank" class="contact-item">
+        <div class="contact-item-icon">💬</div>
+        <div>
+          <div class="contact-item-label">WhatsApp</div>
+          <div class="contact-item-value">(+34) 626 856 596</div>
+        </div>
+      </a>
+      <a href="tel:602602002" class="contact-item">
+        <div class="contact-item-icon">📞</div>
+        <div>
+          <div class="contact-item-label"><span data-lang="es">Teléfono</span><span data-lang="en">Phone</span></div>
+          <div class="contact-item-value">602 602 002</div>
+        </div>
+      </a>
+      <a href="mailto:reformas.sam@gmail.com" class="contact-item">
+        <div class="contact-item-icon">✉️</div>
+        <div>
+          <div class="contact-item-label">Email</div>
+          <div class="contact-item-value">reformas.sam@gmail.com</div>
+        </div>
+      </a>
+      <div class="contact-item" style="cursor:default">
+        <div class="contact-item-icon">📍</div>
+        <div>
+          <div class="contact-item-label"><span data-lang="es">Oficinas</span><span data-lang="en">Offices</span></div>
+          <div class="contact-item-value">Paseo Bizkaia 16, San Sebastián<br>Santa Klara 50, Azkoitia</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="contact-form-side reveal-right">
+    <h3><span data-lang="es">Solicita tu <span>Presupuesto</span> Gratis</span><span data-lang="en">Request your Free <span>Quote</span></span></h3>
+    <form onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label><span data-lang="es">Nombre</span><span data-lang="en">Name</span></label>
+          <input type="text" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label><span data-lang="es">Teléfono</span><span data-lang="en">Phone</span></label>
+          <input type="tel" placeholder="+34 600 000 000">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="tu@email.com">
+      </div>
+      <div class="form-group">
+        <label><span data-lang="es">Servicio</span><span data-lang="en">Service</span></label>
+        <select>
+          <option value="" disabled selected><span data-lang="es">Selecciona un servicio</span></option>
+          <option>Reforma Cocina / Kitchen Renovation</option>
+          <option>Reforma Baño / Bathroom Renovation</option>
+          <option>Electricidad / Electrical Work</option>
+          <option>Fontanería / Plumbing</option>
+          <option>Carpintería / Carpentry</option>
+          <option>Pintura / Painting</option>
+          <option>Pladur / Plasterboard</option>
+          <option>Suelos / Flooring</option>
+          <option>Reforma Integral / Full Renovation</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label><span data-lang="es">Mensaje</span><span data-lang="en">Message</span></label>
+        <textarea placeholder="Cuéntanos sobre tu proyecto..."></textarea>
+      </div>
+      <button type="submit" class="submit-btn">
+        <span data-lang="es">Enviar por WhatsApp →</span>
+        <span data-lang="en">Send via WhatsApp →</span>
+      </button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <img src="https://cdn.shopify.com/s/files/1/0992/7334/3289/files/sam.png?v=1780072140" alt="SAM Reformas" class="footer-logo-img">
+        <span class="footer-logo-text">SAM <span>REFORMAS</span></span>
+      </div>
+      <p><span data-lang="es">Los mejores profesionales trabajando para ti. Reformas integrales en el País Vasco con más de 8 años de experiencia.</span><span data-lang="en">The best professionals working for you. Full renovations in the Basque Country with over 8 years of experience.</span></p>
+    </div>
+    <div class="footer-col">
+      <h4><span data-lang="es">Servicios</span><span data-lang="en">Services</span></h4>
+      <ul>
+        <li><a href="https://wa.me/34626856596"><span data-lang="es">Reforma Cocina</span><span data-lang="en">Kitchen Renovation</span></a></li>
+        <li><a href="https://wa.me/34626856596"><span data-lang="es">Reforma Baño</span><span data-lang="en">Bathroom Renovation</span></a></li>
+        <li><a href="https://wa.me/34626856596">Electricidad</a></li>
+        <li><a href="https://wa.me/34626856596"><span data-lang="es">Fontanería</span><span data-lang="en">Plumbing</span></a></li>
+        <li><a href="https://wa.me/34626856596"><span data-lang="es">Carpintería</span><span data-lang="en">Carpentry</span></a></li>
+        <li><a href="https://wa.me/34626856596"><span data-lang="es">Pintura</span><span data-lang="en">Painting</span></a></li>
+        <li><a href="https://wa.me/34626856596">Pladur</a></li>
+        <li><a href="https://wa.me/34626856596"><span data-lang="es">Suelos</span><span data-lang="en">Flooring</span></a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4><span data-lang="es">Empresa</span><span data-lang="en">Company</span></h4>
+      <ul>
+        <li><a href="#about"><span data-lang="es">Sobre Nosotros</span><span data-lang="en">About Us</span></a></li>
+        <li><a href="#process"><span data-lang="es">Nuestro Proceso</span><span data-lang="en">Our Process</span></a></li>
+        <li><a href="#reviews"><span data-lang="es">Testimonios</span><span data-lang="en">Reviews</span></a></li>
+        <li><a href="#contact"><span data-lang="es">Contacto</span><span data-lang="en">Contact</span></a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4><span data-lang="es">Contacto</span><span data-lang="en">Contact</span></h4>
+      <ul>
+        <li><a href="https://wa.me/34626856596">WhatsApp: (+34) 626 856 596</a></li>
+        <li><a href="tel:602602002">📞 602 602 002</a></li>
+        <li><a href="mailto:reformas.sam@gmail.com">reformas.sam@gmail.com</a></li>
+        <li><a href="#">Paseo Bizkaia 16, San Sebastián</a></li>
+        <li><a href="#">Santa Klara 50, Azkoitia</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2024 <span>SAM Reformas</span>. <span data-lang="es">Todos los derechos reservados.</span><span data-lang="en">All rights reserved.</span></p>
+    <div class="social-links">
+      <a href="https://wa.me/34626856596" class="social-link" title="WhatsApp">💬</a>
+      <a href="mailto:reformas.sam@gmail.com" class="social-link" title="Email">✉️</a>
+      <a href="tel:602602002" class="social-link" title="Phone">📞</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // CURSOR
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+    setTimeout(() => {
+      ring.style.left = e.clientX + 'px';
+      ring.style.top = e.clientY + 'px';
+    }, 80);
+  });
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.style.width='20px'; cursor.style.height='20px'; ring.style.opacity='0'; });
+    el.addEventListener('mouseleave', () => { cursor.style.width='12px'; cursor.style.height='12px'; ring.style.opacity='0.6'; });
+  });
+
+  // NAVBAR SCROLL
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // MOBILE DRAWER TOGGLE
+  function toggleDrawer() {
+    document.getElementById('mobileDrawer').classList.toggle('open');
+    document.getElementById('drawerOverlay').classList.toggle('open');
+  }
+
+  // LANG
+  function setLang(lang) {
+    document.body.classList.remove('lang-es', 'lang-en');
+    document.body.classList.add('lang-' + lang);
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.set === lang));
+  }
+
+  // SCROLL REVEAL
+  const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // 3D TILT
+  document.querySelectorAll('.tilt-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(800px) rotateY(${x * 12}deg) rotateX(${-y * 12}deg) translateY(-8px) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+
+  // FORM SUBMIT → WhatsApp
+  function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const name = form.querySelector('input[type="text"]').value;
+    const phone = form.querySelector('input[type="tel"]').value;
+    const email = form.querySelector('input[type="email"]').value;
+    const service = form.querySelector('select').value;
+    const msg = form.querySelector('textarea').value;
+    const text = encodeURIComponent(`Hola SAM Reformas! 👋\n\nNombre: ${name}\nTeléfono: ${phone}\nEmail: ${email}\nServicio: ${service}\nMensaje: ${msg}\n\n¡Quisiera solicitar un presupuesto gratuito!`);
+    window.open(`https://wa.me/34626856596?text=${text}`, '_blank');
+  }
+
+  // HERO PARALLAX
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    const heroLeft = document.querySelector('.hero-left');
+    if (heroLeft) heroLeft.style.transform = `translateY(${scrollY * 0.15}px)`;
+    const heroRight = document.querySelector('.hero-right');
+    if (heroRight) heroRight.style.transform = `translateY(${scrollY * 0.08}px)`;
+  });
+
+  // Init lang
+  setLang('es');
+</script>
+</body>
+</html>
+
